@@ -1,0 +1,35 @@
+#!/bin/bash
+
+#SBATCH --job-name=submit_3
+#SBATCH --array=0-2
+#SBATCH --output=./slurm_output/sub_3_%a.out
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=10
+
+case $SLURM_ARRAY_TASK_ID in
+        0)
+                run_type=run_e0.3
+                ;;
+        1)
+                run_type=run_e0.35
+                ;;
+        2)
+                run_type=run_e0.4
+                ;;
+esac
+
+if [ -f ./TRE_FILES/submit_TRE_MCMC_$run_type\_$num_beads\_$mode\_$gamma\.slm ]; then
+    rm ./TRE_FILES/submit_TRE_MCMC_$run_type\_$num_beads\_$mode\_$gamma\.slm
+fi
+
+module load anaconda/2021a
+
+python create_submission_file.py --symmetry=$symmetry --mode=$mode --iteration=$iteration --run_type=$run_type --num_beads=$num_beads --gamma=$gamma
+
+cd TRE_Files
+sbatch --wait submit_TRE_MCMC_$run_type\_$num_beads\_$mode\_$gamma\.slm
+cd ..
+python analyze_TRE_MCMC.py --symmetry=$symmetry --num_beads=$num_beads --mode=$mode --iteration=$iteration --gamma=$gamma --run_type=$run_type
+rm ./output/symmetry_$symmetry\/$mode\/records/num_beads_$num_beads\_states_records_*_gamma_$gamma\_$run_type\_iter_$iteration\.pkl
+rm ./output/symmetry_$symmetry\/$mode\/records/num_beads_$num_beads\_beta_records_*_gamma_$gamma\_$run_type\_iter_$iteration\.pkl
+rm ./TRE_Files/submit_TRE_MCMC_$run_type\_$num_beads\_$mode\_$gamma\.slm
