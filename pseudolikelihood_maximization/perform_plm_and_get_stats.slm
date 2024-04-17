@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#SBATCH --job-name=iterate
+#SBATCH --output=./slurm_output/iterate_06_22.log
+
+gamma=6.000E-01
+n_nearest_neighbors_ignored=1
+symmetry="subchain"
+mode="corrected"
+num_beads=40
+num_beads_subchain=40
+lr=0.1
+
+module load anaconda/2021a
+
+# Get PLM-derived model parameters (if necessary)
+if [ ! -f ./output/symmetry_$symmetry\/model_$mode/h_J_num_beads_$num_beads\_gamma_$gamma\_final.pkl ]; then
+    sbatch --wait perform_PLM.py --num_beads_subchain=$num_beads_subchain --num_beads=$num_beads --mode=$mode --symmetry=$symmetry --gamma=$gamma
+fi
+
+# Get PLM-derived model statistics (if necessary)
+if [ ! -f ./output/symmetry_$symmetry\/$mode/statistics_num_beads_$num_beads\_gamma_$gamma\_run_e0.35_iter_0.pkl ]; then
+    sbatch --wait --export=num_beads=$num_beads,mode=$mode,symmetry=$symmetry,gamma=$gamma,iteration=0 submit_3_MCMC.slm
+fi
