@@ -8,16 +8,15 @@ n_nearest_neighbors_ignored=1
 symmetry="subchain"
 mode="corrected"
 num_beads=40
-num_beads_subchain=40
 lr=0.1
 
 module load anaconda/2021a
 
 # Convert LAMMPS dump file conformations into binary states for use in the PLM optimization
-python get_states_from_MD.py
+python get_states_from_MD.py --num_beads=$num_beads
 
 # Get PLM-derived model parameters
-sbatch --wait perform_PLM.py --num_beads_subchain=$num_beads_subchain --num_beads=$num_beads --mode=$mode --symmetry=$symmetry --gamma=$gamma
+sbatch --wait perform_PLM.py --num_beads_subchain=$num_beads --num_beads=$num_beads --mode=$mode --symmetry=$symmetry --gamma=$gamma
 
 # Get PLM-derived model statistics
 sbatch --wait --export=num_beads=$num_beads,mode=$mode,symmetry=$symmetry,gamma=$gamma,iteration=0 submit_3_MCMC.slm
