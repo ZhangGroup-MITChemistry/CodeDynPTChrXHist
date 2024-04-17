@@ -17,9 +17,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--num_beads", type = int)
 args = parser.parse_args()
 num_beads = args.num_beads
-cutoff = 1.76
-sigma_cutoff = 3.72
-sigma = (0.0970460891624333+0.09702725529939032+0.09699588754503724) / 3 # Set length to the mean bond length among all three simulations
+cutoff = 1.707
+sigma = 0.1 # mdtraj will load the conformations in different units; this converts it back 
 
 run_types=["run_e0.3","run_e0.35","run_e0.4"]
 
